@@ -15,6 +15,9 @@ import {
   closeDatabase,
 } from "./database";
 
+// 開発環境かどうかを判定
+const isDev = process.env.NODE_ENV === "development";
+
 // データベースの初期化
 initializeDatabase();
 
@@ -31,8 +34,11 @@ app.whenReady().then(() => {
   });
 
   mainWindow.loadFile("dist/index.html");
-  // 開発時はコメントを外して開発者ツールを開く
-  // mainWindow.webContents.openDevTools();
+
+  // 開発時のみ開発者ツールを開く
+  if (isDev) {
+    mainWindow.webContents.openDevTools();
+  }
 });
 
 /**

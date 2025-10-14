@@ -1,7 +1,13 @@
 # node_modules
 node_modules/
 
-# build
+# build output
 dist/
 release/
+
+# build resources (keep icon files)
 build/
+!build/*.ico
+!build/*.icns
+!build/*.png
+!build/README.md
