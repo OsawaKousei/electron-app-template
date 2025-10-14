@@ -17,8 +17,34 @@ const db = new Database(dbPath);
 /**
  * データベースの初期化
  * テーブルが存在しない場合は作成する
+ * 既存テーブルのスキーマが古い場合は再作成する
  */
 export function initializeDatabase(): void {
+  // 既存のテーブル構造を確認
+  const tableInfo = db
+    .prepare(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='memos'"
+    )
+    .get() as { name: string } | undefined;
+
+  if (tableInfo) {
+    // テーブルが存在する場合、カラムを確認
+    const columns = db.prepare("PRAGMA table_info(memos)").all() as Array<{
+      name: string;
+    }>;
+    const columnNames = columns.map((col) => col.name);
+
+    // 必要なカラムが存在しない場合はテーブルを再作成
+    if (
+      !columnNames.includes("createdAt") ||
+      !columnNames.includes("updatedAt")
+    ) {
+      console.log("古いスキーマを検出。テーブルを再作成します...");
+      db.exec("DROP TABLE IF EXISTS memos");
+    }
+  }
+
+  // テーブルを作成
   const createTableSQL = `
     CREATE TABLE IF NOT EXISTS memos (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,6 +54,7 @@ export function initializeDatabase(): void {
     )
   `;
   db.exec(createTableSQL);
+  console.log("データベースを初期化しました:", dbPath);
 }
 
 /**
